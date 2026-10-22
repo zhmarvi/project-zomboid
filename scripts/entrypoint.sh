@@ -24,7 +24,7 @@ python3 "${CONFIGURE_SCRIPT:-/usr/local/lib/project-zomboid/configure.py}"
 child_pid=''
 phase=update
 stopping=false
-# shellcheck disable=SC2329 # Invoked by TERM/INT traps.
+# shellcheck disable=SC2317,SC2329 # Invoked by TERM/INT traps.
 shutdown() {
   [[ "$stopping" == false ]] || return 0
   stopping=true
