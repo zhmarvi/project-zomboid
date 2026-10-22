@@ -25,6 +25,8 @@ RUN test "${TARGETARCH:-$(dpkg --print-architecture)}" = amd64 \
        --output /tmp/steamcmd.tar.gz \
     && echo "${STEAMCMD_SHA256}  /tmp/steamcmd.tar.gz" | sha256sum --check --strict \
     && tar --extract --gzip --file /tmp/steamcmd.tar.gz --directory /opt/steamcmd-seed \
+    && chmod -R a+rX,go-w /opt/steamcmd-seed \
+    && if test ! -e /lib/ld-linux.so.2; then ln -s /usr/lib32/ld-linux.so.2 /lib/ld-linux.so.2; fi \
     && rm /tmp/steamcmd.tar.gz \
     && chown -R steam:steam /server /data /run/zomboid /home/steam
 
