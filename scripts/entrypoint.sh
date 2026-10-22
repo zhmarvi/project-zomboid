@@ -24,7 +24,7 @@ python3 "${CONFIGURE_SCRIPT:-/usr/local/lib/project-zomboid/configure.py}"
 child_pid=''
 phase=update
 stopping=false
-# shellcheck disable=SC2329 # Invoked by TERM/INT traps.
+# shellcheck disable=SC2317,SC2329 # Invoked by TERM/INT traps.
 shutdown() {
   [[ "$stopping" == false ]] || return 0
   stopping=true
@@ -76,6 +76,13 @@ if [[ "$UPDATE_ON_START" == true || ! -f "$SERVER_DIR/start-server.sh" ]]; then
   [[ "$installed" == true ]] || fail 'SteamCMD failed; refusing to launch a possibly incomplete installation.'
 fi
 [[ -f "$SERVER_DIR/start-server.sh" ]] || fail 'The supplied start-server.sh is missing.'
+
+# Some Steam depots omit SQLite's native JNI library even though the supplied
+# launcher points its JDBC loader at linux64/. Prefer the Steam copy when present.
+if [[ ! -e "$SERVER_DIR/linux64/libsqlitejdbc.so" ]]; then
+  mkdir -p "$SERVER_DIR/linux64"
+  ln -sfn /usr/lib/x86_64-linux-gnu/jni/libsqlitejdbc.so "$SERVER_DIR/linux64/libsqlitejdbc.so"
+fi
 
 if [[ -f "$STEAMCMD_DIR/linux64/steamclient.so" ]]; then
   ln -sfn "$STEAMCMD_DIR/linux64/steamclient.so" "$HOME/.steam/sdk64/steamclient.so"

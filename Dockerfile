@@ -15,7 +15,7 @@ RUN test "${TARGETARCH:-$(dpkg --print-architecture)}" = amd64 \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates curl lib32gcc-s1 lib32stdc++6 libatomic1 \
-       libstdc++6 libsdl2-2.0-0 python3 tini util-linux \
+       libstdc++6 libsdl2-2.0-0 libxerial-sqlite-jdbc-jni python3 tini util-linux \
     && /usr/local/bin/security-updates.sh \
     && groupadd --gid 10000 steam \
     && useradd --uid 10000 --gid 10000 --create-home --shell /bin/bash steam \
@@ -25,6 +25,8 @@ RUN test "${TARGETARCH:-$(dpkg --print-architecture)}" = amd64 \
        --output /tmp/steamcmd.tar.gz \
     && echo "${STEAMCMD_SHA256}  /tmp/steamcmd.tar.gz" | sha256sum --check --strict \
     && tar --extract --gzip --file /tmp/steamcmd.tar.gz --directory /opt/steamcmd-seed \
+    && chmod -R a+rX,go-w /opt/steamcmd-seed \
+    && if test ! -e /lib/ld-linux.so.2; then ln -s /usr/lib32/ld-linux.so.2 /lib/ld-linux.so.2; fi \
     && rm /tmp/steamcmd.tar.gz \
     && chown -R steam:steam /server /data /run/zomboid /home/steam
 
@@ -37,7 +39,11 @@ ENV HOME=/home/steam LANG=C.UTF-8 LC_ALL=C.UTF-8 \
     SHUTDOWN_TIMEOUT=150
 
 COPY --chmod=0755 scripts/entrypoint.sh scripts/healthcheck.sh scripts/console.sh /usr/local/bin/
-COPY --chmod=0644 scripts/configure.py /usr/local/lib/project-zomboid/configure.py
+COPY --chmod=0755 scripts/configure.py /usr/local/lib/project-zomboid/configure.py
+RUN runuser -u steam -- test -x /opt/steamcmd-seed/steamcmd.sh \
+    && runuser -u steam -- test -r /usr/local/lib/project-zomboid/configure.py \
+    && test -r /usr/lib/x86_64-linux-gnu/jni/libsqlitejdbc.so \
+    && test -x /lib/ld-linux.so.2
 USER 10000:10000
 WORKDIR /server
 EXPOSE 16261/udp 16262/udp
