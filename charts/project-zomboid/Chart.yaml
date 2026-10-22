@@ -1,0 +1,10 @@
+apiVersion: v2
+name: project-zomboid
+description: Native AMD64 Project Zomboid dedicated server using SteamCMD
+type: application
+version: 0.1.0
+appVersion: "steam-public"
+kubeVersion: ">=1.27.0-0"
+home: https://github.com/zhmarvi/project-zomboid
+sources:
+  - https://github.com/zhmarvi/project-zomboid

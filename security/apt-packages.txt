@@ -1,0 +1,5 @@
+# Optional reviewed advisory targets, one installed package per line.
+# Use package=DebianVersion to require a particular available fixed version.
+# Document the advisory URL and reason in a comment above each entry.
+# All installed APT packages are upgraded at every uncached runtime build even
+# when this file is empty. Do not invent CVE IDs or add unrelated packages.

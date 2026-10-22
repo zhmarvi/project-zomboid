@@ -1,0 +1,11 @@
+.git
+.github
+charts
+docs
+tests
+examples
+*.tgz
+.env
+*.local.yaml
+*.local
+__pycache__

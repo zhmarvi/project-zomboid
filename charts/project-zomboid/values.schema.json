@@ -1,0 +1,332 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^(sha256:[a-f0-9]{64})?$"
+        },
+        "pullPolicy": {
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ]
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "nameOverride": {
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "type": "string"
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        },
+        "adminUsername": {
+          "type": "string",
+          "minLength": 1
+        },
+        "existingSecret": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "steamBranch": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "updateOnStart": {
+          "type": "boolean"
+        },
+        "validateOnUpdate": {
+          "type": "boolean"
+        },
+        "minMemory": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*[mMgG]$"
+        },
+        "maxMemory": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*[mMgG]$"
+        },
+        "shutdownTimeout": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "settings": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "PUBLIC_NAME": {
+              "type": "string"
+            },
+            "SERVER_PASSWORD": {
+              "type": "string"
+            },
+            "MOD_IDS": {
+              "type": "string"
+            },
+            "WORKSHOP_IDS": {
+              "type": "string"
+            },
+            "MAP_NAMES": {
+              "type": "string"
+            },
+            "PUBLIC": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "PVP": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "PAUSE_EMPTY": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "STEAM_VAC": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "MAX_PLAYERS": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "AUTOSAVE_INTERVAL": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "BACKUPS_COUNT": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "BACKUPS_PERIOD": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer"
+          ]
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "externalTrafficPolicy": {
+          "enum": [
+            "Local",
+            "Cluster"
+          ]
+        },
+        "loadBalancerIP": {
+          "type": "string"
+        },
+        "gamePort": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "directPort": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "nodePorts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "game": {
+              "type": "integer",
+              "minimum": 30000,
+              "maximum": 32767
+            },
+            "direct": {
+              "type": "integer",
+              "minimum": 30000,
+              "maximum": 32767
+            }
+          }
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "server": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "existingClaim": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(Mi|Gi|Ti)$"
+            },
+            "storageClass": {
+              "type": "string"
+            },
+            "accessModes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "ReadWriteOnce",
+                  "ReadWriteOncePod",
+                  "ReadWriteMany"
+                ]
+              }
+            }
+          },
+          "required": [
+            "existingClaim",
+            "size",
+            "storageClass",
+            "accessModes"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "existingClaim": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(Mi|Gi|Ti)$"
+            },
+            "storageClass": {
+              "type": "string"
+            },
+            "accessModes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "ReadWriteOnce",
+                  "ReadWriteOncePod",
+                  "ReadWriteMany"
+                ]
+              }
+            }
+          },
+          "required": [
+            "existingClaim",
+            "size",
+            "storageClass",
+            "accessModes"
+          ]
+        }
+      },
+      "required": [
+        "server",
+        "data"
+      ]
+    },
+    "resources": {
+      "type": "object"
+    },
+    "hostNetwork": {
+      "type": "boolean"
+    },
+    "terminationGracePeriodSeconds": {
+      "type": "integer",
+      "minimum": 10
+    },
+    "nodeSelector": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tolerations": {
+      "type": "array"
+    },
+    "affinity": {
+      "type": "object"
+    },
+    "podAnnotations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "image",
+    "server",
+    "service",
+    "persistence"
+  ],
+  "$schema": "https://json-schema.org/draft-07/schema#"
+}

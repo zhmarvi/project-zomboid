@@ -1,0 +1,10 @@
+.env
+*.local.yaml
+*.local
+*.tgz
+__pycache__/
+*.pyc
+.DS_Store
+trivy-report.json
+image.tar
+dist/

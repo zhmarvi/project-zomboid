@@ -1,0 +1,11 @@
+Server: {{ include "pz.fullname" . }} (one linux/amd64 pod)
+Follow first-install progress:
+  kubectl logs -n {{ .Release.Namespace }} -f {{ include "pz.fullname" . }}-0
+{{ if .Values.hostNetwork }}
+Connect to the scheduled node IP, UDP {{ .Values.service.gamePort }} and {{ .Values.service.directPort }}.
+{{ else }}
+Check the UDP service endpoint:
+  kubectl get service -n {{ .Release.Namespace }} {{ include "pz.fullname" . }}
+{{ end }}
+Steam downloads and world initialization can take several minutes.
+Chart-created PVCs survive uninstall. Back up /data before changing Steam branches.

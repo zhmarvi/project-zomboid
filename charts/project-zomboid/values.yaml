@@ -1,0 +1,72 @@
+image:
+  repository: ghcr.io/zhmarvi/project-zomboid
+  tag: latest
+  digest: ""
+  pullPolicy: Always
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+server:
+  name: servertest
+  adminUsername: admin
+  existingSecret:
+    name: ""  # Required: create a Secret with an admin-password key.
+    key: admin-password
+  steamBranch: public  # The Steam default branch; set unstable explicitly for a beta.
+  updateOnStart: true
+  validateOnUpdate: true
+  minMemory: 1g
+  maxMemory: 4g
+  shutdownTimeout: 150
+  # These settings are applied every start. Remove a key to manage it on the PVC.
+  # Use MOD_IDS and WORKSHOP_IDS as quoted semicolon-separated lists for mods.
+  settings:
+    PUBLIC_NAME: Project Zomboid
+    PUBLIC: "false"
+    MAX_PLAYERS: "16"
+    PVP: "false"
+    PAUSE_EMPTY: "true"
+    AUTOSAVE_INTERVAL: "15"
+    BACKUPS_COUNT: "5"
+    BACKUPS_PERIOD: "120"
+    STEAM_VAC: "true"
+
+service:
+  type: LoadBalancer
+  annotations: {}
+  externalTrafficPolicy: Local
+  loadBalancerIP: ""
+  gamePort: 16261
+  directPort: 16262
+  nodePorts:
+    game: 30261
+    direct: 30262
+
+persistence:
+  server:
+    existingClaim: ""
+    size: 30Gi
+    storageClass: ""  # Empty uses the cluster default; '-' disables dynamic provisioning.
+    accessModes: [ReadWriteOnce]
+  data:
+    existingClaim: ""
+    size: 20Gi
+    storageClass: ""
+    accessModes: [ReadWriteOnce]
+
+resources:
+  requests:
+    cpu: "2"
+    memory: 4Gi
+  limits:
+    cpu: "4"
+    memory: 6Gi  # Leave room beyond the 4g Java heap for native allocations.
+
+hostNetwork: false
+terminationGracePeriodSeconds: 180
+# Keep linux/amd64 constraints even on mixed ARM/x86 clusters.
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}

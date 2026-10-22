@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pz.fullname" . }}
+  labels:
+    {{- include "pz.labels" . | nindent 4 }}
+data:
+  SERVER_NAME: {{ .Values.server.name | quote }}
+  ADMIN_USERNAME: {{ .Values.server.adminUsername | quote }}
+  STEAM_BRANCH: {{ .Values.server.steamBranch | quote }}
+  UPDATE_ON_START: {{ .Values.server.updateOnStart | quote }}
+  VALIDATE_ON_UPDATE: {{ .Values.server.validateOnUpdate | quote }}
+  MIN_MEMORY: {{ .Values.server.minMemory | quote }}
+  MAX_MEMORY: {{ .Values.server.maxMemory | quote }}
+  SHUTDOWN_TIMEOUT: {{ .Values.server.shutdownTimeout | quote }}
+  GAME_PORT: {{ .Values.service.gamePort | quote }}
+  DIRECT_PORT: {{ .Values.service.directPort | quote }}
+  {{- range $key, $value := .Values.server.settings }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

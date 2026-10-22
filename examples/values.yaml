@@ -1,0 +1,11 @@
+server:
+  existingSecret:
+    name: zomboid-admin
+  settings:
+    PUBLIC_NAME: My Zomboid Server
+    PUBLIC: "false"
+    MAX_PLAYERS: "16"
+service:
+  type: LoadBalancer
+# For bare metal, install a UDP-capable load balancer such as MetalLB,
+# or use hostNetwork=true with service.type=ClusterIP and connect to node IP.

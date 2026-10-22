@@ -1,0 +1,34 @@
+services:
+  zomboid:
+    image: ghcr.io/zhmarvi/project-zomboid:latest
+    build:
+      context: .
+    platform: linux/amd64
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 180s
+    mem_limit: 6g
+    ports:
+      - "16261:16261/udp"
+      - "16262:16262/udp"
+    environment:
+      ADMIN_PASSWORD_FILE: /run/secrets/admin-password
+      MIN_MEMORY: 1g
+      MAX_MEMORY: 4g
+      PUBLIC: "false"
+    secrets: [admin-password]
+    volumes:
+      - server:/server
+      - data:/data
+    tmpfs:
+      - /home/steam:uid=10000,gid=10000,mode=0700,exec
+      - /tmp:uid=10000,gid=10000,mode=1777
+      - /run/zomboid:uid=10000,gid=10000,mode=0700
+volumes:
+  server:
+  data:
+secrets:
+  admin-password:
+    file: ${ADMIN_PASSWORD_FILE:?Set ADMIN_PASSWORD_FILE to a local password file}
