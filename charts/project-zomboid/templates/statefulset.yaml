@@ -94,9 +94,10 @@ spec:
           readinessProbe:
             exec:
               command: [/usr/local/bin/healthcheck.sh]
-            initialDelaySeconds: 10
-            periodSeconds: 15
-            timeoutSeconds: 5
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

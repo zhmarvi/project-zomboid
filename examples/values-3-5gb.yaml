@@ -1,0 +1,20 @@
+# Conservative starting point for a pod capped at 3.5 GB (decimal).
+# The Java heap needs headroom for native memory, threads, and game libraries.
+server:
+  minMemory: 512m
+  maxMemory: 2g
+
+resources:
+  requests:
+    cpu: "2"
+    memory: 2Gi
+  limits:
+    cpu: "4"
+    memory: 3500M
+
+# Give Steam updates and a first world load time before readiness checks begin.
+readinessProbe:
+  initialDelaySeconds: 900
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3

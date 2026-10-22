@@ -63,6 +63,12 @@ resources:
     cpu: "4"
     memory: 6Gi  # Leave room beyond the 4g Java heap for native allocations.
 
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
 hostNetwork: false
 terminationGracePeriodSeconds: 180
 # Keep linux/amd64 constraints even on mixed ARM/x86 clusters.

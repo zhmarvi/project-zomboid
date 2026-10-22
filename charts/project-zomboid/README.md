@@ -36,6 +36,40 @@ See `values.yaml` for resources, storage classes, annotations, scheduling and
 supported `server.settings`. UID/GID, replica count, writable directory mounts,
 and Linux/AMD64 scheduling are fixed intentionally.
 
+If the pod has a 3.5 GB memory limit, override the default 4g Java heap too.
+The example profile uses Kubernetes `3500M` (3.5 GB, decimal) for the limit.
+From the repository root, apply both settings to your existing Helm release:
+
+```bash
+helm upgrade zomboid ./charts/project-zomboid -n YOUR_NAMESPACE \
+  --reuse-values -f examples/values-3-5gb.yaml
+```
+
+The profile sets a 2g maximum heap and reserves the rest of the limit for JVM
+native memory, threads, and game libraries. It is a starting point, not a
+guarantee that a particular world or mod set will fit. A manual `kubectl edit`
+limit can be replaced by the next Helm upgrade; keeping the limit in Helm values
+prevents that. The profile also waits 900 seconds (15 minutes) before the first
+readiness check, then checks every 30 seconds with a 10-second timeout. Set
+`readinessProbe.initialDelaySeconds` in your Helm values to change that wait;
+the chart's default is 10 seconds. A longer readiness delay leaves the pod
+unready longer and does not stop a crashing container from restarting.
+
+Confirm the previous exit reason and current memory use with:
+
+```bash
+kubectl get pod zomboid-project-zomboid-0 -n YOUR_NAMESPACE \
+  -o jsonpath='{.status.containerStatuses[?(@.name=="server")].lastState.terminated.reason}{"\n"}'
+kubectl top pod zomboid-project-zomboid-0 -n YOUR_NAMESPACE --containers
+kubectl logs zomboid-project-zomboid-0 -n YOUR_NAMESPACE -c server --previous
+```
+
+Readiness probe failures only keep the Service from sending traffic; this chart
+has no liveness probe, so they do not restart the container. A previous exit
+reason of `OOMKilled` confirms the memory limit was exceeded. If it still ends
+in `OOMKilled`, raise the limit if possible. The server's startup warnings about
+missing icons or models are not themselves evidence of an out-of-memory failure.
+
 For a dedicated bare-metal node:
 
 ```yaml
