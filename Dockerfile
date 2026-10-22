@@ -39,7 +39,10 @@ ENV HOME=/home/steam LANG=C.UTF-8 LC_ALL=C.UTF-8 \
     SHUTDOWN_TIMEOUT=150
 
 COPY --chmod=0755 scripts/entrypoint.sh scripts/healthcheck.sh scripts/console.sh /usr/local/bin/
-COPY --chmod=0644 scripts/configure.py /usr/local/lib/project-zomboid/configure.py
+COPY --chmod=0755 scripts/configure.py /usr/local/lib/project-zomboid/configure.py
+RUN runuser -u steam -- test -x /opt/steamcmd-seed/steamcmd.sh \
+    && runuser -u steam -- test -r /usr/local/lib/project-zomboid/configure.py \
+    && test -x /lib/ld-linux.so.2
 USER 10000:10000
 WORKDIR /server
 EXPOSE 16261/udp 16262/udp
