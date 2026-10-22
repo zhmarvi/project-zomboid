@@ -15,7 +15,7 @@ RUN test "${TARGETARCH:-$(dpkg --print-architecture)}" = amd64 \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates curl lib32gcc-s1 lib32stdc++6 libatomic1 \
-       libstdc++6 libsdl2-2.0-0 python3 tini util-linux \
+       libstdc++6 libsdl2-2.0-0 libxerial-sqlite-jdbc-jni python3 tini util-linux \
     && /usr/local/bin/security-updates.sh \
     && groupadd --gid 10000 steam \
     && useradd --uid 10000 --gid 10000 --create-home --shell /bin/bash steam \
@@ -42,6 +42,7 @@ COPY --chmod=0755 scripts/entrypoint.sh scripts/healthcheck.sh scripts/console.s
 COPY --chmod=0755 scripts/configure.py /usr/local/lib/project-zomboid/configure.py
 RUN runuser -u steam -- test -x /opt/steamcmd-seed/steamcmd.sh \
     && runuser -u steam -- test -r /usr/local/lib/project-zomboid/configure.py \
+    && test -r /usr/lib/x86_64-linux-gnu/jni/libsqlitejdbc.so \
     && test -x /lib/ld-linux.so.2
 USER 10000:10000
 WORKDIR /server
