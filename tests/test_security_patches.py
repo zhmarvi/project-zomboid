@@ -177,6 +177,32 @@ class SecurityPatchTests(unittest.TestCase):
         self.assertEqual(status["skipped"][0]["reason"], "manual-apt-target-exists")
         self.assertEqual(self.manifest_path.read_text().count("libdemo"), 1)
 
+    def test_bare_manual_target_rebuilds_for_verified_fix_without_manifest_change(self):
+        content = "libdemo\n" + patches.BEGIN + "\n" + patches.END + "\n"
+        self.manifest_path.write_text(content)
+        status = self.propose(report(vulnerability()))
+        self.assertEqual(status, {"findings": 1, "actionable": 1, "changed": False, "skipped": []})
+        self.assertEqual(self.manifest_path.read_text(), content)
+        self.assertTrue(any(call[:3] == ("apt-get", "-s", "--no-install-recommends") for call in self.apt.calls))
+
+    def test_bare_manual_target_needs_a_candidate_with_fixed_source(self):
+        content = "libdemo\n" + patches.BEGIN + "\n" + patches.END + "\n"
+        self.manifest_path.write_text(content)
+        self.apt.source = "libdemo (1.5)"
+        status = self.propose(report(vulnerability()))
+        self.assertEqual(status["actionable"], 0)
+        self.assertEqual(status["skipped"][0]["reason"], "candidate-source-below-fix")
+        self.assertEqual(self.manifest_path.read_text(), content)
+
+    def test_bare_manual_target_needs_successful_apt_simulation(self):
+        content = "libdemo\n" + patches.BEGIN + "\n" + patches.END + "\n"
+        self.manifest_path.write_text(content)
+        self.apt.simulation_code = 100
+        status = self.propose(report(vulnerability()))
+        self.assertEqual(status["actionable"], 0)
+        self.assertEqual(status["skipped"][0]["reason"], "apt-simulation-failed")
+        self.assertEqual(self.manifest_path.read_text(), content)
+
     def test_ambiguous_multiarch_name_is_not_guessed(self):
         self.apt.inventory = (
             "libdemo:amd64\tinstall ok installed\tlibdemo\t1.0\t1.0\tamd64\n"

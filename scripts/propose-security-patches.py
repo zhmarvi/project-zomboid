@@ -202,14 +202,17 @@ def old_guards(section):
 
 
 def manual_packages(prefix, suffix):
-    packages = set()
+    packages = {}
     for line in (prefix + suffix).splitlines():
         line = line.split("#", 1)[0].strip()
         if not line:
             continue
-        match = re.match(r"([a-z0-9][a-z0-9+.-]*(?::[a-z0-9]+)?)(?:>=|=|$)", line)
+        match = re.fullmatch(
+            r"([a-z0-9][a-z0-9+.-]*(?::[a-z0-9]+)?)(?:(>=|=)[A-Za-z0-9.+:~_-]+)?",
+            line,
+        )
         if match:
-            packages.add(match.group(1))
+            packages.setdefault(match.group(1), set()).add(match.group(2) or "bare")
     return packages
 
 
@@ -237,6 +240,7 @@ def propose(report_path, manifest_path, status_path):
     packages = installed_packages() if findings else {}
     skipped = []
     eligible = {}
+    bare_manual = set()
 
     for result, finding in findings:
         name = finding.get("PkgName")
@@ -263,9 +267,16 @@ def propose(report_path, manifest_path, status_path):
         if resolved is None:
             skip("package-not-uniquely-installed")
             continue
-        if resolved in manual or resolved.split(":", 1)[0] in manual:
+        manual_kinds = manual.get(resolved, set())
+        # An unqualified manual target may refer to another architecture.
+        # Only the exact installed package name can be trusted as a bare target.
+        if ":" in resolved and resolved.split(":", 1)[0] in manual:
+            manual_kinds = manual_kinds | {"other-architecture"}
+        if manual_kinds and manual_kinds != {"bare"}:
             skip("manual-apt-target-exists")
             continue
+        if manual_kinds == {"bare"}:
+            bare_manual.add(resolved)
         source_name, installed_source, installed_binary, architecture = packages[resolved]
         reported_installed = finding.get("InstalledVersion")
         if reported_installed not in (installed_binary, installed_source):
@@ -297,6 +308,10 @@ def propose(report_path, manifest_path, status_path):
             )
             continue
         actionable += len(proposals)
+        if package in bare_manual:
+            # The reviewed bare target already requests the newest APT version.
+            # Rebuild to use that fix without inserting a duplicate target.
+            continue
         for identifier, fixed, _, _ in proposals:
             if package not in guards or version_cmp(fixed, "gt", guards[package]):
                 guards[package] = fixed

@@ -171,8 +171,9 @@ restart your cluster automatically.
 
 The Security patches workflow scans the published image daily. For fixable
 High/Critical Debian package findings with an available APT update, it records
-minimum source versions in `security/apt-packages.txt` and starts a fresh
-Container build. That build must pass its own scan and smoke test before it
+minimum source versions in `security/apt-packages.txt` where needed and starts
+a fresh Container build. An existing bare package target already requests the
+newest APT version. The build must pass its own scan and smoke test before it
 publishes an image. Findings that APT cannot fix remain in the report for review.
 
 Read [SECURITY.md](SECURITY.md) for patching instructions and the scope of the

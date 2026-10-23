@@ -14,8 +14,9 @@ The build does not add third-party APT repositories or mix Debian releases.
 The daily Security patches workflow scans the published `latest` image. If
 Trivy reports a fixable High/Critical Debian OS package vulnerability and the
 configured APT repositories offer a suitable upgrade, the workflow updates the
-managed section of `security/apt-packages.txt` and dispatches a fresh Container
-build. A bot commit alone does not trigger a push workflow. The new build pulls
+managed section of `security/apt-packages.txt` where needed and dispatches a
+fresh Container build. A bare manual package target already requests the latest
+APT version. A bot commit alone does not trigger a push workflow. The new build pulls
 the base, bypasses the runtime cache, rescans, and smoke-tests before publishing.
 The full scan and patch decision are retained as a workflow artifact. A fixable
 finding without an applicable APT upgrade makes this workflow fail for review.
