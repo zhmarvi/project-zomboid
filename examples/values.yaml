@@ -7,5 +7,5 @@ server:
     MAX_PLAYERS: "16"
 service:
   type: LoadBalancer
-# For bare metal, install a UDP-capable load balancer such as MetalLB,
+# For bare metal, provide a UDP-capable load balancer,
 # or use hostNetwork=true with service.type=ClusterIP and connect to node IP.

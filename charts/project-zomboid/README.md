@@ -26,6 +26,7 @@ claims. The storage must be writable by UID/GID 10000.
 | `server.steamBranch` | `public` |
 | `server.updateOnStart` / `.validateOnUpdate` | `true` / `true` |
 | `server.minMemory` / `.maxMemory` | `1g` / `4g` |
+| `resources.requests` / `.limits` | 2 CPU / 4Gi RAM; 4 CPU / 6Gi RAM (8 GiB, 4-vCPU node profile) |
 | `service.type` | `LoadBalancer` |
 | `service.gamePort` / `.directPort` | `16261` / `16262` UDP |
 | `service.externalTrafficPolicy` | `Local` |
@@ -36,24 +37,13 @@ See `values.yaml` for resources, storage classes, annotations, scheduling and
 supported `server.settings`. UID/GID, replica count, writable directory mounts,
 and Linux/AMD64 scheduling are fixed intentionally.
 
-If the pod has a 3.5 GB memory limit, override the default 4g Java heap too.
-The example profile uses Kubernetes `3500M` (3.5 GB, decimal) for the limit.
-From the repository root, apply both settings to your existing Helm release:
-
-```bash
-helm upgrade zomboid ./charts/project-zomboid -n YOUR_NAMESPACE \
-  --reuse-values -f examples/values-3-5gb.yaml
-```
-
-The profile sets a 2g maximum heap and reserves the rest of the limit for JVM
-native memory, threads, and game libraries. It is a starting point, not a
-guarantee that a particular world or mod set will fit. A manual `kubectl edit`
-limit can be replaced by the next Helm upgrade; keeping the limit in Helm values
-prevents that. The profile also waits 900 seconds (15 minutes) before the first
-readiness check, then checks every 30 seconds with a 10-second timeout. Set
-`readinessProbe.initialDelaySeconds` in your Helm values to change that wait;
-the chart's default is 10 seconds. A longer readiness delay leaves the pod
-unready longer and does not stop a crashing container from restarting.
+When changing the pod memory limit, adjust `server.maxMemory` as well so the
+JVM leaves room for native allocations, threads, and game libraries. Keep
+resource overrides in Helm values; a manual `kubectl edit` may be replaced by
+the next Helm upgrade. Set `readinessProbe.initialDelaySeconds` in Helm values
+if startup needs more time before the first check. A longer readiness delay
+leaves the pod unready longer and does not stop a crashing container from
+restarting.
 
 Confirm the previous exit reason and current memory use with:
 

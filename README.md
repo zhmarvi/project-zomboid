@@ -14,7 +14,8 @@ The repo follows the Dockerfile, scripts, Compose, charts, and workflow layout o
 
 Requirements: Linux AMD64 worker, Kubernetes 1.27+, Helm 3, a default storage
 class (or existing PVCs), and a UDP-capable LoadBalancer. The default requests
-2 CPUs / 4 GiB RAM and limits RAM to 6 GiB, with a 4 GiB maximum Java heap.
+2 CPUs / 4 GiB RAM and limits the pod to 4 CPUs / 6 GiB RAM, with a 4 GiB
+maximum Java heap. This profile is intended for an 8 GiB, 4-vCPU node.
 First boot downloads several GB of game files and needs outbound Steam access.
 
 ```bash
@@ -46,7 +47,7 @@ Connect from the game's Join/Favorites menu to the service's external IP, port
 **16261**. Forward **UDP 16261 and 16262** through host/network firewalls and
 your router when applicable. No HTTP ingress or RCON exposure is required.
 
-For bare metal, use a UDP-capable implementation such as MetalLB, or set
+For bare metal, provide a UDP-capable LoadBalancer. Alternatively, set
 `hostNetwork=true` and `service.type=ClusterIP`, pin the pod to a chosen AMD64
 node using `nodeSelector`, and connect to that node's IP. Only one server may
 use these ports per node. A NodePort example is in the
