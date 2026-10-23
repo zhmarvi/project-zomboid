@@ -11,15 +11,28 @@ universally stronger than a supported Ubuntu LTS.
 indexes and upgrades all installed packages with available Debian fixes.
 The build does not add third-party APT repositories or mix Debian releases.
 
-1. Inspect the workflow's full JSON report and the
+The daily Security patches workflow scans the published `latest` image. If
+Trivy reports a fixable High/Critical Debian OS package vulnerability and the
+configured APT repositories offer a suitable upgrade, the workflow updates the
+managed section of `security/apt-packages.txt` and dispatches a fresh Container
+build. A bot commit alone does not trigger a push workflow. The new build pulls
+the base, bypasses the runtime cache, rescans, and smoke-tests before publishing.
+The full scan and patch decision are retained as a workflow artifact. A fixable
+finding without an applicable APT upgrade makes this workflow fail for review.
+
+For manual patching:
+
+1. Inspect the JSON report and the
    [Debian Security Tracker](https://security-tracker.debian.org/tracker/).
-2. If a fixed version is available, rebuild with `make security-build` or run
-   the Container workflow. CI always pulls the base and bypasses runtime cache.
-3. For an explicit advisory requirement, add an **already installed** package
-   to `security/apt-packages.txt`. Optionally use `package=version` to require an
-   available fixed version. Include the advisory link and rationale above it.
-   The build refuses absent packages, unavailable versions and downgrades.
-4. Verify the report, publish the rebuilt image, and redeploy its digest.
+2. Rebuild with `make security-build` or run the Container workflow to pick up
+   available Debian fixes.
+3. Add an **already installed** binary package outside the managed section of
+   `security/apt-packages.txt` for an explicit advisory requirement. Use
+   `package>=source-version` for a durable minimum guard, or `package=version`
+   only when an exact binary version is required and available. Include the
+   advisory link and rationale above manual entries. The build refuses absent
+   packages, unavailable versions and downgrades.
+4. Verify the rebuilt image's scan and redeploy its digest.
 
 All upgrades use the configured signed Debian repositories, including the base
 image's `trixie-security` source. The script applies available updates from all

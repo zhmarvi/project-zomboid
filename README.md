@@ -169,6 +169,12 @@ Version tags also publish SemVer tags. Timestamp tags identify rebuilds of the
 same Git commit; deployments should pin the resulting digest. Rebuilds do not
 restart your cluster automatically.
 
+The Security patches workflow scans the published image daily. For fixable
+High/Critical Debian package findings with an available APT update, it records
+minimum source versions in `security/apt-packages.txt` and starts a fresh
+Container build. That build must pass its own scan and smoke test before it
+publishes an image. Findings that APT cannot fix remain in the report for review.
+
 Read [SECURITY.md](SECURITY.md) for patching instructions and the scope of the
 scan. APT updates cannot fix proprietary game/JVM/Steam libraries downloaded at
 runtime, and vendor-unfixed CVEs remain in the report. No distribution or image

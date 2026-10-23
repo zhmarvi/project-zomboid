@@ -1,5 +1,11 @@
-# Optional reviewed advisory targets, one installed package per line.
-# Use package=DebianVersion to require a particular available fixed version.
-# Document the advisory URL and reason in a comment above each entry.
+# Optional reviewed advisory targets, one installed binary package per line.
+# package=DebianBinaryVersion requires that exact available binary version.
+# package>=DebianSourceVersion requires at least that source version, allowing
+# later Debian fixes. The binary package's ${source:Version} is checked after
+# upgrades; this matters when binary and source versions differ (for example
+# a binary-only rebuild). Document advisory URL and reason above manual entries.
 # All installed APT packages are upgraded at every uncached runtime build even
 # when this file is empty. Do not invent CVE IDs or add unrelated packages.
+
+# BEGIN AUTO-GENERATED SECURITY FIXES
+# END AUTO-GENERATED SECURITY FIXES
