@@ -10,15 +10,6 @@ supplied `start-server.sh`, the default UDP ports and console shutdown. The
 the SteamCMD installation/distribution mechanism. Steam public and beta releases
 change independently of this container; the chart version is not a game version.
 
-Reviewed references:
-
-| Source | Influence |
-| --- | --- |
-| [zhmarvi/valheim-arm64](https://github.com/zhmarvi/valheim-arm64) | Top-level Dockerfile, scripts, Helm chart, Compose and package-refresh workflow layout |
-| [danixu86 image](https://hub.docker.com/r/danixu86/project-zomboid-dedicated-server) and [source](https://github.com/Danixu/project-zomboid-server-docker) | Supplied launcher, JVM arguments before `--`, persistent INI management and console shutdown |
-| [jsknnr/project-zomboid-server](https://github.com/jsknnr/project-zomboid-server) | Non-root identity, separate install/data storage, environment settings and Steam branch selection |
-| [Debian stable release](https://www.debian.org/releases/stable/) | Debian 13 slim base; i386 support libraries remain available for AMD64 |
-
 The runtime installs the game at first launch instead of redistributing game
 files in the image. Existing game installs persist across image upgrades. Startup
 updates fail closed after three attempts. The image runs the upstream launcher
