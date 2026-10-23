@@ -6,10 +6,6 @@ game's supplied **`start-server.sh`** and bundled JVM. Steam integration stays
 enabled. The default is Steam's **public** branch; betas require an explicit
 `STEAM_BRANCH` / `server.steamBranch` selection. Clients must use the same build.
 
-The repo follows the Dockerfile, scripts, Compose, charts, and workflow layout of
-[valheim-arm64](https://github.com/zhmarvi/valheim-arm64). See
-[design and references](docs/design.md) for the other inspirations.
-
 ## Quick start: Kubernetes
 
 Requirements: Linux AMD64 worker, Kubernetes 1.27+, Helm 3, a default storage
@@ -36,13 +32,6 @@ kubectl -n zomboid logs -f zomboid-project-zomboid-0
 kubectl -n zomboid get svc zomboid-project-zomboid
 ```
 
-Keep the password file securely outside this checkout after recording it in a
-password manager. `*.local` files are ignored by Git. The bootstrap admin username
-is `admin`. The secret is supplied only while `/data/db/<server-name>.db` is
-absent. Updating that secret does **not** reset an existing admin account; use the
-game's administration commands. The upstream launcher/game may log bootstrap
-arguments, so protect first-boot logs and change the initial password in-game.
-
 Connect from the game's Join/Favorites menu to the service's external IP, port
 **16261**. Forward **UDP 16261 and 16262** through host/network firewalls and
 your router when applicable. No HTTP ingress or RCON exposure is required.
@@ -53,11 +42,6 @@ node using `nodeSelector`, and connect to that node's IP. Only one server may
 use these ports per node. A NodePort example is in the
 [chart guide](charts/project-zomboid/README.md); its translated external ports
 need careful forwarding for direct-connect traffic.
-
-If GHCR reports unauthorized, make the **container package** public in GitHub
-after its first publication (public repository visibility does not guarantee a
-public package), or configure `imagePullSecrets`. The repo workflow uses
-`GITHUB_TOKEN`; Docker Hub credentials are unnecessary.
 
 ## Local Docker / Compose
 
