@@ -48,7 +48,7 @@ jobs:
             echo "build_image=true" >> "$GITHUB_OUTPUT"
           fi
       - run: sudo apt-get update && sudo apt-get install -y shellcheck yamllint
-      - uses: azure/setup-helm@59b1c81c6280f5abebb1fb1bc585696daa7dfb42  # v5
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310  # v5
         with:
           version: v3.17.3
       - run: ./scripts/validate.sh
