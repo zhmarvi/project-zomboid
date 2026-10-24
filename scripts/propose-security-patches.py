@@ -155,6 +155,15 @@ def simulates_upgrade(package, installed_version, candidate):
         matches_package = name == package or (
             ":" not in package and name.split(":", 1)[0] == package
         )
+        if not matches_package and ":" in package:
+            # dpkg-query qualifies Multi-Arch packages even for the native
+            # architecture; APT may use a bare name plus [architecture].
+            base, architecture = package.split(":", 1)
+            apt_architecture = re.search(r"\[([a-z0-9]+)\]\)\s*$", line)
+            matches_package = (
+                name == base and apt_architecture is not None
+                and apt_architecture.group(1) == architecture
+            )
         if matches_package and new_version == candidate:
             target_found = True
     return target_found and version_cmp(candidate, "gt", installed_version)

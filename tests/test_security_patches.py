@@ -227,6 +227,24 @@ class SecurityPatchTests(unittest.TestCase):
         self.assertEqual(status["actionable"], 1)
         self.assertIn("libdemo:i386>=2.0", self.manifest_path.read_text())
 
+    def test_apt_bare_name_matches_qualified_inventory_with_same_architecture(self):
+        self.apt.inventory = "libdemo:amd64\tinstall ok installed\tlibdemo\t1.0\t1.0\tamd64\n"
+        status = self.propose(report(vulnerability()))
+        self.assertEqual(status["actionable"], 1)
+        self.assertIn("libdemo:amd64>=2.0", self.manifest_path.read_text())
+
+    def test_apt_bare_name_requires_matching_architecture(self):
+        self.apt.inventory = "libdemo:i386\tinstall ok installed\tlibdemo\t1.0\t1.0\ti386\n"
+        for simulation in (
+            "Inst libdemo [1.0] (2.0 Debian:13/stable [amd64])\n",
+            "Inst libdemo [1.0] (2.0 Debian:13/stable)\n",
+        ):
+            with self.subTest(simulation=simulation):
+                self.apt.simulation = simulation
+                status = self.propose(report(vulnerability(package="libdemo:i386")))
+                self.assertEqual(status["actionable"], 0)
+                self.assertEqual(status["skipped"][0]["reason"], "apt-simulation-failed")
+
     def test_malformed_scan_fails_without_mutating_manifest(self):
         original = self.manifest_path.read_text()
         with self.assertRaises(ValueError):
