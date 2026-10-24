@@ -5,9 +5,11 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 scratch=$(mktemp -d)
 trap 'rm -rf -- "$scratch"' EXIT
 mkdir -p "$scratch/bin"
+export REAL_DPKG
+REAL_DPKG=$(command -v dpkg || true)
 
 # Run the real script with only its absolute inventory destination redirected.
-# All package-manager and cleanup commands are mocked; no system files change.
+# Mutating commands are mocked; version syntax uses real dpkg when available.
 sed "s|/usr/local/share/project-zomboid/apt-inventory.tsv|$scratch/apt-inventory.tsv|" \
   "$root/scripts/security-updates.sh" > "$scratch/security-updates.sh"
 
@@ -32,8 +34,12 @@ cat > "$scratch/bin/dpkg" <<'MOCK'
 #!/usr/bin/env bash
 printf 'dpkg %s\n' "$*" >> "$MOCK_LOG"
 case "$1" in
-  --validate-thing)
-    [[ "$2" == version && "$3" =~ ^[0-9]+$ ]]
+  --validate-version)
+    if [[ -n "$REAL_DPKG" ]]; then
+      "$REAL_DPKG" "$@"
+    else
+      [[ $# -eq 2 && "$2" =~ ^[0-9]+$ ]]
+    fi
     ;;
   --compare-versions)
     [[ "$2" =~ ^[0-9]+$ && "$3" == ge && "$4" =~ ^[0-9]+$ ]] || exit 2
@@ -84,6 +90,9 @@ test -s "$scratch/apt-inventory.tsv"
 run_case 3 1 'libfoo>=2' 1
 grep -Fq 'Debian source version is below required minimum' "$scratch/output.log"
 grep -Fq 'dpkg --compare-versions 1 ge 2' "$scratch/commands.log"
+
+run_case 2 2 'libfoo=2' 0
+grep -Fq 'dpkg --validate-version 2' "$scratch/commands.log"
 
 run_case 2 2 'libfoo=1' 1
 grep -Fq 'Refusing APT downgrade' "$scratch/output.log"

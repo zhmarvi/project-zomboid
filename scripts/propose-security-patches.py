@@ -36,7 +36,7 @@ def version_cmp(left, operation, right):
 def valid_version(value):
     if not isinstance(value, str) or not VERSION.fullmatch(value):
         return False
-    return run("dpkg", "--validate-thing", "version", value).returncode == 0
+    return run("dpkg", "--validate-version", value).returncode == 0
 
 
 def read_report(path):

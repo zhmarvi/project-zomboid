@@ -32,14 +32,14 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   if [[ "$target" =~ $source_guard_re ]]; then
     package=${BASH_REMATCH[1]}
     minimum=${BASH_REMATCH[3]}
-    dpkg --validate-thing version "$minimum" >/dev/null || {
+    dpkg --validate-version "$minimum" >/dev/null || {
       printf 'Invalid Debian source version: %s\n' "$minimum" >&2; exit 1;
     }
   elif [[ "$target" =~ $apt_target_re ]]; then
     package=${BASH_REMATCH[1]}
     exact=${BASH_REMATCH[4]:-}
     if [[ -n "$exact" ]]; then
-      dpkg --validate-thing version "$exact" >/dev/null || {
+      dpkg --validate-version "$exact" >/dev/null || {
         printf 'Invalid Debian binary version: %s\n' "$exact" >&2; exit 1;
       }
     fi

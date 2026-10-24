@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -48,7 +49,7 @@ class FakeApt:
         output, code = "", 0
         if command == "dpkg-query":
             output = self.inventory
-        elif args[:2] == ("dpkg", "--validate-thing"):
+        elif args[:2] == ("dpkg", "--validate-version"):
             code = 0
         elif args[:2] == ("dpkg", "--compare-versions"):
             left, operation, right = args[2:]
@@ -233,6 +234,19 @@ class SecurityPatchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.propose({"SchemaVersion": 2, "Results": []})
         self.assertEqual(self.manifest_path.read_text(), original)
+
+
+@unittest.skipUnless(shutil.which("dpkg"), "real dpkg is required (available in Linux CI)")
+class DpkgIntegrationTests(unittest.TestCase):
+    def test_real_debian_version_validation(self):
+        for version in ("1.0", "1:2.0-3+deb13u1", "1.1.0-2+b7", "1.1.0-2+deb13u1"):
+            with self.subTest(version=version):
+                self.assertTrue(patches.valid_version(version))
+        # Passes the local allowlist but is rejected by dpkg's version parser.
+        self.assertFalse(patches.valid_version("1.0-"))
+
+    def test_real_installed_package_inventory(self):
+        self.assertTrue(patches.installed_packages())
 
 
 if __name__ == "__main__":
